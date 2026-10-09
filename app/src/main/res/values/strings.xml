@@ -1,4 +1,22 @@
 <resources>
     <string name="app_name">VKCourse</string>
-    <string name="hello_android">Hello, Android!</string>
+    <string name="main_title">Практическое задание №3</string>
+    <string name="main_description">Введите текст для второй Activity или отправки. Для набора номера используйте это же поле.</string>
+    <string name="input_label">Текст или номер телефона</string>
+    <string name="input_hint">Например: Привет, Android! или +7 (999) 123-45-67</string>
+    <string name="open_second">Открыть вторую Activity</string>
+    <string name="dial_friend">Позвонить другу</string>
+    <string name="share_text">Поделиться текстом</string>
+    <string name="share_chooser">Поделиться через…</string>
+    <string name="second_title">Вторая Activity</string>
+    <string name="received_text">Полученный текст:</string>
+    <string name="back_to_main">Вернуться на первый экран</string>
+    <string name="error_empty_text">Введите текст: поле не должно быть пустым или содержать только пробелы.</string>
+    <string name="error_empty_phone">Введите номер телефона.</string>
+    <string name="error_invalid_phone">Некорректный номер. Используйте от 3 до 15 цифр; допустимы плюс в начале, пробелы, скобки и дефисы.</string>
+    <string name="error_no_dialer">Не найдено приложение для набора номера.</string>
+    <string name="error_no_share_app">Не найдено приложение для отправки текста.</string>
+    <string name="error_open_second">Не удалось открыть вторую Activity.</string>
+    <string name="error_intent_blocked">Система запретила открывать это приложение.</string>
+    <string name="error_missing_text">Текст не передан или пуст. Вернитесь на первый экран и введите текст.</string>
 </resources>
