@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Allows checking for a text-sharing app with Android package visibility rules. -->
+    <!-- Разрешаем проверять, есть ли приложение для отправки текста. -->
     <queries>
         <intent>
             <action android:name="android.intent.action.SEND" />

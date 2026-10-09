@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 internal fun MainScreen(actions: IntentActions) {
+    // Сохраняем ввод и ошибку, чтобы они не пропадали при повороте экрана.
     var input by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf<Int?>(null) }
 

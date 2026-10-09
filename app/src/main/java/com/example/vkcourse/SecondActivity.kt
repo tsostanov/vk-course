@@ -20,6 +20,7 @@ class SecondActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Если текст не передали, ниже покажем понятное сообщение вместо пустого экрана.
         val receivedText = intent.getStringExtra(EXTRA_TEXT)
 
         setContent {

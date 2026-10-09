@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    // Kotlin уже встроен в AGP, поэтому отдельно добавляем только компилятор Compose.
     alias(libs.plugins.compose.compiler)
 }
 
@@ -36,6 +37,7 @@ android {
 }
 
 dependencies {
+    // BOM подбирает совместимые версии библиотек Compose.
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui)

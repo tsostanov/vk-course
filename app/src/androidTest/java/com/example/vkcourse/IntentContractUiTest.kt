@@ -24,6 +24,7 @@ class IntentContractUiTest {
 
     private fun captureFromButton(input: String, button: Int): Intent {
         var launched: Intent? = null
+        // Нажимаем настоящую кнопку, но вместо запуска другого приложения сохраняем Intent.
         val actions = IntentActions(context, launch = { launched = it }, canShare = { true })
         compose.setContent { HomeworkTheme { MainScreen(actions) } }
         compose.onNodeWithTag("input").performTextReplacement(input)
@@ -37,6 +38,7 @@ class IntentContractUiTest {
         val intent = captureFromButton("+7 (999) 123-45-67", R.string.dial_friend)
         assertEquals(Intent.ACTION_DIAL, intent.action)
         assertEquals("tel", intent.data?.scheme)
+        // Uri кодирует плюс как %2B, поэтому сравниваем уже декодированный номер.
         assertEquals("+79991234567", intent.data?.schemeSpecificPart)
     }
 

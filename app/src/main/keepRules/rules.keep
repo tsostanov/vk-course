@@ -1,12 +1,9 @@
-# Add project specific R8 rules here.
-# AGP will combine all keep rule files in src/main/keepRules to pass to R8
-#
-# For more details, see
-#   https://d.android.com/r/tools/r8/keep-rules
+# Здесь можно добавить правила R8, чтобы нужный код не удалялся при оптимизации.
+# AGP собирает правила из файлов в src/main/keepRules.
+# Документация: https://d.android.com/r/tools/r8/keep-rules
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
+# Если появится WebView с JavaScript, можно раскомментировать пример ниже
+# и указать полное имя класса JavaScript-интерфейса.
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
