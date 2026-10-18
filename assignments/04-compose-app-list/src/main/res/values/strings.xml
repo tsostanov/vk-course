@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Каталог · Задание 4</string>
+    <string name="catalog_title">Каталог</string>
+    <string name="catalog_icon_description">Иконка приложения «Каталог»</string>
+    <string name="apps_title">Приложения</string>
+    <string name="catalog_subtitle">Полезное — всегда под рукой.</string>
+    <plurals name="app_count">
+        <item quantity="one">%d приложение в подборке</item>
+        <item quantity="few">%d приложения в подборке</item>
+        <item quantity="many">%d приложений в подборке</item>
+        <item quantity="other">%d приложений в подборке</item>
+    </plurals>
+
+    <string name="vk_name">ВКонтакте</string>
+    <string name="vk_description">Друзья, сообщества и истории о том, что вам близко.</string>
+    <string name="category_social">Социальные сети</string>
+    <string name="music_name">VK Музыка</string>
+    <string name="music_description">Любимые треки и новые плейлисты под настроение.</string>
+    <string name="category_music">Музыка</string>
+    <string name="video_name">VK Видео</string>
+    <string name="video_description">Видео, шоу и трансляции любимых авторов.</string>
+    <string name="category_video">Видео</string>
+    <string name="mail_name">Почта Mail</string>
+    <string name="mail_description">Все письма в одном месте. Личные и рабочие.</string>
+    <string name="category_productivity">Производительность</string>
+    <string name="cloud_name">Облако Mail</string>
+    <string name="cloud_description">Фотографии и документы, которые всегда с вами.</string>
+    <string name="category_tools">Инструменты</string>
+    <string name="maps_name">Карты</string>
+    <string name="maps_description">Места, маршруты и идеи для следующей прогулки.</string>
+    <string name="category_travel">Путешествия</string>
+    <string name="books_name">Книги</string>
+    <string name="books_description">Истории, к которым хочется возвращаться.</string>
+    <string name="category_books">Книги и справочники</string>
+    <string name="education_name">VK Образование</string>
+    <string name="education_description">Курсы и практика для нового шага в IT.</string>
+    <string name="category_education">Образование</string>
+</resources>

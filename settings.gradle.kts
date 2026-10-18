@@ -23,5 +23,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "VKCourse"
-include(":app")
- 
+
+include(":homework-03", ":homework-04")
+project(":homework-03").projectDir = file("assignments/03-intents")
+project(":homework-04").projectDir = file("assignments/04-compose-app-list")
