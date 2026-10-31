@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.vkcourse.applist.ui.AppCatalogScreen
+import com.example.vkcourse.applist.ui.AppNavigation
 import com.example.vkcourse.applist.ui.AppCatalogTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         setContent {
             AppCatalogTheme {
-                AppCatalogScreen()
+                AppNavigation()
             }
         }
     }

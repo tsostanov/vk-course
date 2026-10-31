@@ -41,7 +41,10 @@ import com.example.vkcourse.applist.data.CatalogApp
 import com.example.vkcourse.applist.data.sampleApps
 
 @Composable
-fun AppCatalogScreen(apps: List<CatalogApp> = sampleApps) {
+fun AppCatalogScreen(
+    apps: List<CatalogApp> = sampleApps,
+    onAppClick: (CatalogApp) -> Unit = {},
+) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
@@ -66,7 +69,11 @@ fun AppCatalogScreen(apps: List<CatalogApp> = sampleApps) {
                     CatalogHeader(apps.size)
                 }
                 items(apps, key = { it.id }, contentType = { "app" }) { app ->
-                    AppListItem(app)
+                    AppListItem(
+                        app = app,
+                        onClick = { onAppClick(app) },
+                        modifier = Modifier.testTag("app_${app.id}"),
+                    )
                 }
             }
         }
@@ -125,9 +132,14 @@ private fun CatalogHeader(appCount: Int) {
 }
 
 @Composable
-private fun AppListItem(app: CatalogApp) {
+internal fun AppListItem(
+    app: CatalogApp,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Surface(
-        modifier = Modifier.fillMaxWidth().testTag("app_${app.id}"),
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
     ) {
