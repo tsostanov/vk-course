@@ -5,7 +5,10 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -47,5 +50,37 @@ class AppCatalogTest {
         compose.activityRule.scenario.recreate()
         compose.onNodeWithText("VK Образование", useUnmergedTree = true).assertIsDisplayed()
         compose.onNodeWithText("Каталог").assertIsDisplayed()
+    }
+
+    @Test
+    fun tappingCatalogItemOpensDetailsWithThreePageShowcase() {
+        compose.onNodeWithTag("app_vk").performClick()
+
+        compose.onNodeWithTag("app_details").assertIsDisplayed()
+        compose.onNodeWithText("Карточка приложения").assertIsDisplayed()
+        compose.onNodeWithText("Витрина").assertIsDisplayed()
+        compose.onNodeWithText("1 / 3").assertIsDisplayed()
+        compose.onNodeWithTag("showcase_app_music").assertIsDisplayed()
+    }
+
+    @Test
+    fun tappingShowcaseItemReturnsToCatalog() {
+        compose.onNodeWithTag("app_vk").performClick()
+        compose.onNodeWithTag("showcase_app_music").performClick()
+
+        compose.onNodeWithTag("app_list").assertIsDisplayed()
+        compose.onNodeWithText("Каталог").assertIsDisplayed()
+    }
+
+    @Test
+    fun showcaseCanBeSwipedThroughAllThreePages() {
+        compose.onNodeWithTag("app_vk").performClick()
+        val pager = compose.onNodeWithTag("showcase_pager")
+
+        pager.performTouchInput { swipeLeft() }
+        compose.onNodeWithText("2 / 3").assertIsDisplayed()
+        pager.performTouchInput { swipeLeft() }
+        compose.onNodeWithText("3 / 3").assertIsDisplayed()
+        compose.onNodeWithTag("showcase_app_clips").assertIsDisplayed()
     }
 }
