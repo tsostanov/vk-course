@@ -1,7 +1,9 @@
 package com.example.vkcourse.applist
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -82,5 +84,17 @@ class AppCatalogTest {
         pager.performTouchInput { swipeLeft() }
         compose.onNodeWithText("3 / 3").assertIsDisplayed()
         compose.onNodeWithTag("showcase_app_clips").assertIsDisplayed()
+    }
+
+    @Test
+    fun toolbarSnackbarIsNotShownAgainAfterActivityRecreation() {
+        compose.onNodeWithTag("toolbar_info").performClick()
+        compose.onNodeWithText("Список приложений сохранён.").assertIsDisplayed()
+
+        compose.activityRule.scenario.recreate()
+
+        compose.onNodeWithTag("app_list").assertIsDisplayed()
+        compose.onNodeWithText("ВКонтакте", useUnmergedTree = true).assertIsDisplayed()
+        compose.onAllNodesWithText("Список приложений сохранён.").assertCountEquals(0)
     }
 }

@@ -17,13 +17,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,24 +37,55 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vkcourse.applist.R
 import com.example.vkcourse.applist.data.CatalogApp
 import com.example.vkcourse.applist.data.sampleApps
 
 @Composable
 fun AppCatalogScreen(
-    apps: List<CatalogApp> = sampleApps,
     onAppClick: (CatalogApp) -> Unit = {},
+    viewModel: AppCatalogViewModel = viewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarMessage = stringResource(R.string.catalog_info_message)
+
+    LaunchedEffect(viewModel, snackbarMessage) {
+        viewModel.events.collect { event ->
+            when (event) {
+                AppCatalogEvent.ShowCatalogInfo -> snackbarHostState.showSnackbar(snackbarMessage)
+            }
+        }
+    }
+
+    AppCatalogContent(
+        apps = uiState.apps,
+        onAppClick = onAppClick,
+        onToolbarInfoClick = viewModel::onToolbarInfoClick,
+        snackbarHostState = snackbarHostState,
+    )
+}
+
+@Composable
+private fun AppCatalogContent(
+    apps: List<CatalogApp>,
+    onAppClick: (CatalogApp) -> Unit,
+    onToolbarInfoClick: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { CatalogToolbar() },
+        topBar = { CatalogToolbar(onInfoClick = onToolbarInfoClick) },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -82,7 +119,9 @@ fun AppCatalogScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CatalogToolbar() {
+private fun CatalogToolbar(onInfoClick: () -> Unit) {
+    val infoDescription = stringResource(R.string.catalog_info_description)
+
     TopAppBar(
         title = {
             Text(
@@ -97,6 +136,21 @@ private fun CatalogToolbar() {
                 contentDescription = stringResource(R.string.catalog_icon_description),
                 modifier = Modifier.padding(start = 16.dp, end = 12.dp).size(40.dp),
             )
+        },
+        actions = {
+            IconButton(
+                onClick = onInfoClick,
+                modifier = Modifier.testTag("toolbar_info"),
+            ) {
+                Text(
+                    text = "i",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.semantics {
+                        contentDescription = infoDescription
+                    },
+                )
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = CatalogBlue,
@@ -185,6 +239,11 @@ internal fun AppListItem(
 @Composable
 private fun AppCatalogPreview() {
     AppCatalogTheme {
-        AppCatalogScreen()
+        AppCatalogContent(
+            apps = sampleApps,
+            onAppClick = {},
+            onToolbarInfoClick = {},
+            snackbarHostState = remember { SnackbarHostState() },
+        )
     }
 }
