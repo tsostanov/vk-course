@@ -1,4 +1,4 @@
-package com.example.vkcourse.applist.ui
+package com.example.vkcourse.applist.presentation
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,15 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vkcourse.applist.R
-import com.example.vkcourse.applist.data.CatalogApp
-import com.example.vkcourse.applist.data.sampleApps
+import com.example.vkcourse.applist.domain.model.CatalogApp
 
 @Composable
 fun AppCatalogScreen(
-    onAppClick: (CatalogApp) -> Unit = {},
-    viewModel: AppCatalogViewModel = viewModel(),
+    viewModel: AppCatalogViewModel,
+    onAppClick: (CatalogApp) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -68,6 +67,7 @@ fun AppCatalogScreen(
 
     AppCatalogContent(
         apps = uiState.apps,
+        isLoading = uiState.isLoading,
         onAppClick = onAppClick,
         onToolbarInfoClick = viewModel::onToolbarInfoClick,
         snackbarHostState = snackbarHostState,
@@ -77,6 +77,7 @@ fun AppCatalogScreen(
 @Composable
 private fun AppCatalogContent(
     apps: List<CatalogApp>,
+    isLoading: Boolean,
     onAppClick: (CatalogApp) -> Unit,
     onToolbarInfoClick: () -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -94,23 +95,29 @@ private fun AppCatalogContent(
                 .consumeWindowInsets(innerPadding),
             contentAlignment = Alignment.TopCenter,
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .widthIn(max = 720.dp)
-                    .fillMaxSize()
-                    .testTag("app_list"),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item(key = "header", contentType = "header") {
-                    CatalogHeader(apps.size)
-                }
-                items(apps, key = { it.id }, contentType = { "app" }) { app ->
-                    AppListItem(
-                        app = app,
-                        onClick = { onAppClick(app) },
-                        modifier = Modifier.testTag("app_${app.id}"),
-                    )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center).testTag("app_list_loading"),
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .widthIn(max = 720.dp)
+                        .fillMaxSize()
+                        .testTag("app_list"),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item(key = "header", contentType = "header") {
+                        CatalogHeader(apps.size)
+                    }
+                    items(apps, key = { it.id }, contentType = { "app" }) { app ->
+                        AppListItem(
+                            app = app,
+                            onClick = { onAppClick(app) },
+                            modifier = Modifier.testTag("app_${app.id}"),
+                        )
+                    }
                 }
             }
         }
@@ -203,7 +210,7 @@ internal fun AppListItem(
             verticalAlignment = Alignment.Top,
         ) {
             Image(
-                painter = painterResource(app.icon),
+                painter = painterResource(app.icon.toDrawableResource()),
                 // Название уже есть рядом: TalkBack не нужно повторять его для иконки.
                 contentDescription = null,
                 modifier = Modifier.size(56.dp).testTag("app_icon_${app.id}"),
@@ -213,17 +220,17 @@ internal fun AppListItem(
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 Text(
-                    text = stringResource(app.name),
+                    text = app.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = stringResource(app.description),
+                    text = app.description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = stringResource(app.category),
+                    text = app.category,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 3.dp),
@@ -240,7 +247,8 @@ internal fun AppListItem(
 private fun AppCatalogPreview() {
     AppCatalogTheme {
         AppCatalogContent(
-            apps = sampleApps,
+            apps = emptyList(),
+            isLoading = false,
             onAppClick = {},
             onToolbarInfoClick = {},
             snackbarHostState = remember { SnackbarHostState() },
