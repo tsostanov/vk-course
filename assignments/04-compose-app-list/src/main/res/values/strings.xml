@@ -35,4 +35,11 @@
     <string name="education_name">VK Образование</string>
     <string name="education_description">Курсы и практика для нового шага в IT.</string>
     <string name="category_education">Образование</string>
+    <string name="clips_name">VK Клипы</string>
+    <string name="clips_description">Короткие видео и рекомендации авторов для любого настроения.</string>
+    <string name="app_details_title">Карточка приложения</string>
+    <string name="app_details_description">Описание</string>
+    <string name="developer_vk">VK</string>
+    <string name="developer_mail">Mail</string>
+    <string name="showcase_title">Витрина</string>
 </resources>
