@@ -1,4 +1,4 @@
-package com.example.vkcourse.applist.ui
+package com.example.vkcourse.applist.presentation
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

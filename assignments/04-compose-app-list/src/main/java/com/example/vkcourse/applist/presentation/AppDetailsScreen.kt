@@ -1,4 +1,4 @@
-package com.example.vkcourse.applist.ui
+package com.example.vkcourse.applist.presentation
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -45,8 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vkcourse.applist.R
-import com.example.vkcourse.applist.data.CatalogApp
-import com.example.vkcourse.applist.data.sampleApps
+import com.example.vkcourse.applist.domain.model.AppIcon
+import com.example.vkcourse.applist.domain.model.CatalogApp
 
 private const val SHOWCASE_PAGE_SIZE = 3
 private const val SHOWCASE_PAGE_COUNT = 3
@@ -56,7 +56,7 @@ fun AppDetailsScreen(
     app: CatalogApp,
     onBackClick: () -> Unit,
     onShowcaseAppClick: (CatalogApp) -> Unit,
-    showcaseApps: List<CatalogApp> = sampleApps,
+    showcaseApps: List<CatalogApp>,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -82,7 +82,7 @@ fun AppDetailsScreen(
                     .semantics { heading() },
             )
             Text(
-                text = stringResource(app.description),
+                text = app.description,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 20.dp, top = 8.dp, end = 20.dp),
@@ -109,7 +109,7 @@ private fun AppDetailsHeader(app: CatalogApp) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            painter = painterResource(app.icon),
+            painter = painterResource(app.icon.toDrawableResource()),
             contentDescription = null,
             modifier = Modifier
                 .size(112.dp)
@@ -118,17 +118,17 @@ private fun AppDetailsHeader(app: CatalogApp) {
         Spacer(Modifier.width(16.dp))
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(
-                text = stringResource(app.category),
+                text = app.category,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = stringResource(app.name),
+                text = app.name,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = stringResource(app.developer),
+                text = app.developer,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -249,9 +249,17 @@ private fun DetailsToolbar(onBackClick: () -> Unit) {
 private fun AppDetailsPreview() {
     AppCatalogTheme {
         AppDetailsScreen(
-            app = sampleApps.first(),
+            app = CatalogApp(
+                id = "vk",
+                name = "ВКонтакте",
+                description = "Друзья, сообщества и истории о том, что вам близко.",
+                category = "Социальные сети",
+                developer = "VK",
+                icon = AppIcon.SOCIAL,
+            ),
             onBackClick = {},
             onShowcaseAppClick = {},
+            showcaseApps = emptyList(),
         )
     }
 }

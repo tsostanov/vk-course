@@ -12,8 +12,9 @@
 | 4.1 | Создание UI в Android. Часть 1 | Каталог приложений на Compose: тулбар, иконки, описания и категории | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
 | 4.2 | Создание UI в Android. Часть 2 | Карточка приложения с витриной из 9 приложений, постраничным Pager и навигацией на Compose | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
 | 5 | Presentation pattern | MVVM на `ViewModel` и `StateFlow`; snackbar по нажатию на тулбар без повторного показа после пересоздания экрана | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
+| 6 | Слоистая архитектура | Data, domain и presentation: DTO → Mapper → domain model → Repository → Use Case → ViewModel | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
 
-Задания 4.1, 4.2 и 5 расширяют одно приложение каталога. В каждой папке — исходники, тесты, инструкция запуска и чек-лист самопроверки.
+Задания 4.1, 4.2, 5 и 6 расширяют одно приложение каталога. В каждой папке — исходники, тесты, инструкция запуска и чек-лист самопроверки.
 
 ## Структура
 
@@ -23,7 +24,7 @@ assignments/
 │   ├── src/
 │   ├── build.gradle.kts
 │   └── README.md
-└── 04-compose-app-list/    # Задания 4–5 — каталог, витрина и MVVM
+└── 04-compose-app-list/    # Задания 4–6 — каталог и слоистая архитектура
     ├── src/
     ├── docs/              # Скриншоты интерфейса
     ├── build.gradle.kts
