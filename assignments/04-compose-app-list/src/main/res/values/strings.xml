@@ -42,4 +42,6 @@
     <string name="developer_vk">VK</string>
     <string name="developer_mail">Mail</string>
     <string name="showcase_title">Витрина</string>
+    <string name="catalog_info_description">Информация о каталоге</string>
+    <string name="catalog_info_message">Список приложений сохранён.</string>
 </resources>
