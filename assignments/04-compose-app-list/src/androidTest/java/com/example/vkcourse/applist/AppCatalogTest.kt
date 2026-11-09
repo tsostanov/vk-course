@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -12,14 +13,46 @@ import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.lifecycle.ViewModelProvider
+import com.example.vkcourse.applist.data.network.CatalogApi
+import com.example.vkcourse.applist.di.NetworkModule
+import com.example.vkcourse.applist.presentation.AppCatalogViewModel
+import dagger.hilt.android.testing.BindValue
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
+@UninstallModules(NetworkModule::class)
 class AppCatalogTest {
-    @get:Rule
+    private val fakeApi = FakeCatalogApi()
+
+    @BindValue
+    @JvmField
+    val api: CatalogApi = fakeApi
+
+    @get:Rule(order = 0)
+    val hilt = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
     val compose = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun waitForCatalog() {
+        hilt.inject()
+        waitForTag("app_list")
+    }
+
+    private fun waitForTag(tag: String) {
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
 
     @Test
     fun launchShowsToolbarAndAllRequiredAppFields() {
@@ -89,12 +122,39 @@ class AppCatalogTest {
     @Test
     fun toolbarSnackbarIsNotShownAgainAfterActivityRecreation() {
         compose.onNodeWithTag("toolbar_info").performClick()
-        compose.onNodeWithText("Список приложений сохранён.").assertIsDisplayed()
+        compose.onNodeWithText("Каталог приложений загружается с сервера.").assertIsDisplayed()
 
         compose.activityRule.scenario.recreate()
 
         compose.onNodeWithTag("app_list").assertIsDisplayed()
         compose.onNodeWithText("ВКонтакте", useUnmergedTree = true).assertIsDisplayed()
-        compose.onAllNodesWithText("Список приложений сохранён.").assertCountEquals(0)
+        compose.onAllNodesWithText("Каталог приложений загружается с сервера.").assertCountEquals(0)
+    }
+
+    @Test
+    fun networkErrorShowsRetryAndRetryLoadsCatalog() {
+        compose.runOnIdle {
+            fakeApi.failNextRequest = true
+            ViewModelProvider(compose.activity)[AppCatalogViewModel::class.java].loadCatalog()
+        }
+        waitForTag("catalog_retry")
+        compose.onNodeWithText("Не удалось загрузить каталог. Проверьте подключение и попробуйте ещё раз.")
+            .assertIsDisplayed()
+
+        compose.onNodeWithTag("catalog_retry").performClick()
+
+        waitForTag("app_list")
+        compose.onNodeWithText("ВКонтакте", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun emptyCatalogShowsMessageAndReloadButton() {
+        compose.runOnIdle {
+            fakeApi.returnEmptyCatalog = true
+            ViewModelProvider(compose.activity)[AppCatalogViewModel::class.java].loadCatalog()
+        }
+        waitForTag("catalog_retry")
+        compose.onNodeWithText("В каталоге пока нет приложений.").assertIsDisplayed()
+        compose.onNodeWithTag("catalog_retry").assertIsDisplayed()
     }
 }

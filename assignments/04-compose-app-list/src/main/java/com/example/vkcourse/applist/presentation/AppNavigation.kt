@@ -39,17 +39,23 @@ fun AppNavigation() {
             arguments = listOf(navArgument("appId") { type = NavType.StringType }),
         ) { entry ->
             val appId = requireNotNull(entry.arguments?.getString("appId"))
-            val app = requireNotNull(catalogState.apps.firstOrNull { it.id == appId }) {
-                "Unknown app id: $appId"
+            val app = catalogState.apps.firstOrNull { it.id == appId }
+            if (app == null) {
+                // После восстановления процесса каталог ещё может загружаться.
+                AppCatalogScreen(
+                    viewModel = catalogViewModel,
+                    onAppClick = { navController.navigate("app/${it.id}") },
+                )
+            } else {
+                AppDetailsScreen(
+                    app = app,
+                    showcaseApps = catalogState.apps,
+                    onBackClick = { navController.popBackStack() },
+                    onShowcaseAppClick = {
+                        navController.popBackStack(CATALOG_ROUTE, inclusive = false)
+                    },
+                )
             }
-            AppDetailsScreen(
-                app = app,
-                showcaseApps = catalogState.apps,
-                onBackClick = { navController.popBackStack() },
-                onShowcaseAppClick = {
-                    navController.popBackStack(CATALOG_ROUTE, inclusive = false)
-                },
-            )
         }
     }
 }

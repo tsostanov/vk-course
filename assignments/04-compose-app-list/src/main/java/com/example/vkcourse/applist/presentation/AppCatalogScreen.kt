@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -68,6 +68,8 @@ fun AppCatalogScreen(
     AppCatalogContent(
         apps = uiState.apps,
         isLoading = uiState.isLoading,
+        hasError = uiState.hasError,
+        onRetryClick = viewModel::loadCatalog,
         onAppClick = onAppClick,
         onToolbarInfoClick = viewModel::onToolbarInfoClick,
         snackbarHostState = snackbarHostState,
@@ -81,6 +83,8 @@ private fun AppCatalogContent(
     onAppClick: (CatalogApp) -> Unit,
     onToolbarInfoClick: () -> Unit,
     snackbarHostState: SnackbarHostState,
+    hasError: Boolean = false,
+    onRetryClick: () -> Unit = {},
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -99,6 +103,17 @@ private fun AppCatalogContent(
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center).testTag("app_list_loading"),
                 )
+            } else if (hasError || apps.isEmpty()) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center).padding(24.dp).testTag("catalog_status"),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Text(stringResource(if (hasError) R.string.catalog_load_error else R.string.catalog_empty))
+                    Button(onClick = onRetryClick, modifier = Modifier.testTag("catalog_retry")) {
+                        Text(stringResource(R.string.catalog_retry))
+                    }
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -184,7 +199,7 @@ private fun CatalogHeader(appCount: Int) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = pluralStringResource(R.plurals.app_count, appCount, appCount),
+            text = stringResource(R.string.app_count, appCount),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(top = 4.dp),
@@ -209,10 +224,8 @@ internal fun AppListItem(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            Image(
-                painter = painterResource(app.icon.toDrawableResource()),
-                // Название уже есть рядом: TalkBack не нужно повторять его для иконки.
-                contentDescription = null,
+            CatalogAppIcon(
+                iconUrl = app.iconUrl,
                 modifier = Modifier.size(56.dp).testTag("app_icon_${app.id}"),
             )
             Column(

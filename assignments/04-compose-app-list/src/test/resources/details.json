@@ -1,0 +1,11 @@
+{
+  "id": "fa2e31b8-1234-4cf7-9914-108a170a1b01",
+  "name": "QuickNote",
+  "developer": "QuickSoft Inc.",
+  "category": "Производительность",
+  "ageRating": 3,
+  "size": 8.2,
+  "iconUrl": "https://example.com/icon.png",
+  "screenshotUrlList": ["https://example.com/screenshot.png"],
+  "description": "Подробное описание QuickNote"
+}

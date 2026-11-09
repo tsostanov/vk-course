@@ -1,7 +1,6 @@
 package com.example.vkcourse.applist.presentation
 
 import android.content.res.Configuration
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -45,7 +43,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vkcourse.applist.R
-import com.example.vkcourse.applist.domain.model.AppIcon
 import com.example.vkcourse.applist.domain.model.CatalogApp
 
 private const val SHOWCASE_PAGE_SIZE = 3
@@ -108,9 +105,8 @@ private fun AppDetailsHeader(app: CatalogApp) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painter = painterResource(app.icon.toDrawableResource()),
-            contentDescription = null,
+        CatalogAppIcon(
+            iconUrl = app.iconUrl,
             modifier = Modifier
                 .size(112.dp)
                 .clip(RoundedCornerShape(24.dp)),
@@ -126,11 +122,6 @@ private fun AppDetailsHeader(app: CatalogApp) {
                 text = app.name,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = app.developer,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -254,8 +245,7 @@ private fun AppDetailsPreview() {
                 name = "ВКонтакте",
                 description = "Друзья, сообщества и истории о том, что вам близко.",
                 category = "Социальные сети",
-                developer = "VK",
-                icon = AppIcon.SOCIAL,
+                iconUrl = "",
             ),
             onBackClick = {},
             onShowcaseAppClick = {},

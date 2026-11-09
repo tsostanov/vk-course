@@ -4,16 +4,14 @@
     <string name="catalog_icon_description">Иконка приложения «Каталог»</string>
     <string name="apps_title">Приложения</string>
     <string name="catalog_subtitle">Полезное — всегда под рукой.</string>
-    <plurals name="app_count">
-        <item quantity="one">%d приложение в подборке</item>
-        <item quantity="few">%d приложения в подборке</item>
-        <item quantity="many">%d приложений в подборке</item>
-        <item quantity="other">%d приложений в подборке</item>
-    </plurals>
+    <string name="app_count">Приложений в подборке: %d</string>
 
     <string name="app_details_title">Карточка приложения</string>
     <string name="app_details_description">Описание</string>
     <string name="showcase_title">Витрина</string>
     <string name="catalog_info_description">Информация о каталоге</string>
-    <string name="catalog_info_message">Список приложений сохранён.</string>
+    <string name="catalog_info_message">Каталог приложений загружается с сервера.</string>
+    <string name="catalog_load_error">Не удалось загрузить каталог. Проверьте подключение и попробуйте ещё раз.</string>
+    <string name="catalog_empty">В каталоге пока нет приложений.</string>
+    <string name="catalog_retry">Повторить</string>
 </resources>
