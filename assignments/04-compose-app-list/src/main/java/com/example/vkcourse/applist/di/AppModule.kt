@@ -2,7 +2,7 @@ package com.example.vkcourse.applist.di
 
 import com.example.vkcourse.applist.data.repository.AppRepositoryImpl
 import com.example.vkcourse.applist.data.source.AppCatalogDataSource
-import com.example.vkcourse.applist.data.source.HardcodedAppCatalogDataSource
+import com.example.vkcourse.applist.data.source.RemoteAppCatalogDataSource
 import com.example.vkcourse.applist.domain.repository.AppRepository
 import com.example.vkcourse.applist.domain.usecase.GetCatalogAppsUseCase
 import dagger.Binds
@@ -21,7 +21,7 @@ abstract class AppModule {
 
     @Binds
     @Singleton
-    abstract fun bindAppCatalogDataSource(impl: HardcodedAppCatalogDataSource): AppCatalogDataSource
+    abstract fun bindAppCatalogDataSource(impl: RemoteAppCatalogDataSource): AppCatalogDataSource
 
     companion object {
         @Provides
