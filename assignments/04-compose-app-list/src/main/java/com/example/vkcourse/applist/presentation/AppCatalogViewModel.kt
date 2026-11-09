@@ -2,9 +2,10 @@ package com.example.vkcourse.applist.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.ViewModelProvider
 import com.example.vkcourse.applist.domain.model.CatalogApp
 import com.example.vkcourse.applist.domain.usecase.GetCatalogAppsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ sealed interface AppCatalogEvent {
     data object ShowCatalogInfo : AppCatalogEvent
 }
 
-class AppCatalogViewModel(
+@HiltViewModel
+class AppCatalogViewModel @Inject constructor(
     private val getCatalogApps: GetCatalogAppsUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AppCatalogUiState())
@@ -43,18 +45,6 @@ class AppCatalogViewModel(
     fun onToolbarInfoClick() {
         viewModelScope.launch {
             eventsChannel.send(AppCatalogEvent.ShowCatalogInfo)
-        }
-    }
-
-    class Factory(
-        private val getCatalogApps: GetCatalogAppsUseCase,
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            require(modelClass.isAssignableFrom(AppCatalogViewModel::class.java)) {
-                "Unsupported ViewModel type: ${modelClass.name}"
-            }
-            @Suppress("UNCHECKED_CAST")
-            return AppCatalogViewModel(getCatalogApps) as T
         }
     }
 }
