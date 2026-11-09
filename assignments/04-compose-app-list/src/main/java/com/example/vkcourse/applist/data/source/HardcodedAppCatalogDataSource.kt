@@ -1,8 +1,9 @@
 package com.example.vkcourse.applist.data.source
 
 import com.example.vkcourse.applist.data.dto.CatalogAppDto
+import javax.inject.Inject
 
-class HardcodedAppCatalogDataSource : AppCatalogDataSource {
+class HardcodedAppCatalogDataSource @Inject constructor() : AppCatalogDataSource {
     override fun getApps() = listOf(
         CatalogAppDto(
             id = "vk",

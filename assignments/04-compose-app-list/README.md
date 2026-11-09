@@ -1,8 +1,8 @@
-# Задания 4–6 · Каталог приложений
+# Задания 4–7 · Каталог приложений
 
 [← Все задания курса](../../README.md)
 
-Решение заданий 4–6 на Kotlin и Jetpack Compose: каталог приложений, карточка приложения с витриной, MVVM и Clean Architecture. В каталоге есть синий тулбар и вертикальный список; в карточке — описание и витрина из девяти приложений на трёх страницах. Навигация связывает каталог и карточки приложений.
+Решение заданий 4–7 на Kotlin и Jetpack Compose: каталог приложений, карточка приложения с витриной, MVVM, Clean Architecture и внедрение зависимостей через Hilt. В каталоге есть синий тулбар и вертикальный список; в карточке — описание и витрина из девяти приложений на трёх страницах. Навигация связывает каталог и карточки приложений.
 
 ## Интерфейс
 
@@ -28,6 +28,7 @@
 | DTO и Mapper | `CatalogAppDto` с данными источника конвертируется `CatalogAppMapper` в доменную `CatalogApp`; неизвестный ключ иконки явно отклоняется |
 | Repository | `AppRepositoryImpl` преобразует DTO и возвращает доменные модели через интерфейс `AppRepository` |
 | Use Case | `GetCatalogAppsUseCase` изолирует запрос каталога для presentation |
+| Dependency Injection | Hilt создаёт граф зависимостей; `AppModule` связывает интерфейсы с реализациями, а `AppCatalogViewModel` получает Use Case через `@Inject` |
 
 Поддержаны светлая и тёмная темы, системные отступы и увеличенный шрифт. Высота строк зависит от текста, положение списка сохраняется при пересоздании Activity. В Android Studio доступны три Preview: светлый, тёмный и с крупным шрифтом.
 
@@ -50,6 +51,8 @@
 ```text
 src/main/java/com/example/vkcourse/applist/
 ├── MainActivity.kt          # Точка входа
+├── AppCatalogApplication.kt # Application с @HiltAndroidApp
+├── di/AppModule.kt          # @Binds для интерфейсов и @Provides для Use Case
 ├── data/
 │   ├── dto/                 # DTO модели каталога
 │   ├── mapper/              # DTO → domain model
@@ -63,7 +66,7 @@ src/main/java/com/example/vkcourse/applist/
     ├── AppCatalogScreen.kt  # Каталог и переиспользуемая карточка списка
     ├── AppCatalogViewModel.kt # Состояние каталога и одноразовые UI-события
     ├── AppDetailsScreen.kt  # Карточка приложения и Pager-витрина
-    ├── AppNavigation.kt     # Переходы и сборка зависимостей
+    ├── AppNavigation.kt     # Переходы и получение ViewModel через hiltViewModel()
     ├── AppIconResources.kt  # Привязка доменных иконок к Android-ресурсам
     └── Theme.kt             # Цвета светлой и тёмной тем
 src/main/res/
@@ -71,7 +74,31 @@ src/main/res/
 └── values/strings.xml      # Локализуемые подписи интерфейса
 ```
 
-`MainActivity` собирает зависимости: создаёт источник DTO, `AppRepositoryImpl` и передаёт репозиторий в presentation. Направление зависимостей идёт внутрь: presentation зависит от domain, data реализует domain-контракт; domain не зависит от Android и ресурсов. Захардкоженные записи лежат только в data-источнике, а интерфейс получает доменные модели после преобразования Mapper.
+Hilt собирает зависимости через `AppModule`, а `MainActivity` с `@AndroidEntryPoint` запускает Compose-интерфейс. Направление зависимостей идёт внутрь: presentation зависит от domain, data реализует domain-контракт; domain не зависит от Android, Hilt и ресурсов. Захардкоженные записи лежат только в data-источнике, а интерфейс получает доменные модели после преобразования Mapper.
+
+## Задание 7: внедрение зависимостей
+
+- `AppCatalogApplication` помечен `@HiltAndroidApp` и зарегистрирован в манифесте.
+- `MainActivity` помечена `@AndroidEntryPoint`.
+- `AppModule` установлен в `SingletonComponent`. Два метода `@Binds` связывают `AppRepositoryImpl` с `AppRepository` и `HardcodedAppCatalogDataSource` с `AppCatalogDataSource`. Эти зависимости имеют область `@Singleton`.
+- Метод `@Provides` создаёт `GetCatalogAppsUseCase` из интерфейса `AppRepository`. Благодаря этому domain остаётся без аннотаций DI.
+- `AppCatalogViewModel` помечена `@HiltViewModel` и получает `GetCatalogAppsUseCase` в конструкторе с `@Inject`.
+- `AppNavigation` получает общую для каталога и карточки ViewModel через `hiltViewModel()` на уровне Activity. Ручная фабрика удалена.
+
+Граф создания зависимостей:
+
+```text
+HardcodedAppCatalogDataSource → AppCatalogDataSource
+    → AppRepositoryImpl → AppRepository
+    → GetCatalogAppsUseCase → AppCatalogViewModel
+```
+
+Самопроверка задания 7:
+
+- [ ] Gradle Sync и `:homework-04:assembleDebug` проходят, Hilt генерирует компоненты без ошибок отсутствующих зависимостей.
+- [ ] В `AppModule` есть `@Binds` и `@Provides`, а ViewModel использует конструктор с `@Inject`.
+- [ ] При запуске каталог загружается через внедрённый Use Case; переход в карточку и возврат работают.
+- [ ] После пересоздания Activity список остаётся доступен.
 
 ## Самопроверка
 
@@ -101,6 +128,8 @@ src/main/res/
 ```
 
 Unit-тесты проверяют преобразование DTO в domain model, обработку неизвестного ключа и выдачу девяти доменных моделей репозиторием. UI-тесты проверяют поля каталога, доступность последнего приложения при прокрутке, восстановление позиции после пересоздания Activity, переходы между каталогом и карточками, перелистывание витрины, показ snackbar и отсутствие его повторного показа после пересоздания Activity.
+
+Проверено для задания 7: сборка debug APK успешна, 4 unit-теста и 7 UI-тестов на Pixel 10 (API 37) проходят. Lint: 0 ошибок, 1 предупреждение `DataExtractionRules` о настройках резервного копирования. Если Gradle повторно использует процесс с Java из расширения VS Code без `jlink`, запускайте проверку с `--no-daemon`, используя полный JDK из настроек проекта.
 
 Отчёты: `build/reports/lint-results-debug.html` и `build/reports/androidTests/connected/debug/index.html` внутри этой папки.
 
