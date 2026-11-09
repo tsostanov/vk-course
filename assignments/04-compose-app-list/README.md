@@ -1,138 +1,79 @@
-# Задания 4–7 · Каталог приложений
+# Каталог приложений
 
-[← Все задания курса](../../README.md)
+[← К списку заданий](../../README.md)
 
-Решение заданий 4–7 на Kotlin и Jetpack Compose: каталог приложений, карточка приложения с витриной, MVVM, Clean Architecture и внедрение зависимостей через Hilt. В каталоге есть синий тулбар и вертикальный список; в карточке — описание и витрина из девяти приложений на трёх страницах. Навигация связывает каталог и карточки приложений.
+Учебное приложение на Kotlin и Jetpack Compose. На главном экране — список приложений с иконками, описаниями и категориями. По нажатию открывается карточка с подробностями и витриной: девять приложений на трёх перелистываемых страницах.
 
-## Интерфейс
+Каталог постепенно дополняется по ходу курса. В заданиях 4–6 появились экраны, навигация, ViewModel и разделение на слои. В задании 7 добавлен Hilt для внедрения зависимостей.
 
-<img src="docs/catalog-light.png" width="280" alt="Каталог приложений в светлой теме"> <img src="docs/catalog-dark.png" width="280" alt="Каталог приложений в тёмной теме">
+## Как выглядит
 
-## Условия и реализация
+<img src="docs/catalog-light.png" width="280" alt="Каталог в светлой теме"> <img src="docs/catalog-dark.png" width="280" alt="Каталог в тёмной теме">
 
-| Требование | Реализация |
-| --- | --- |
-| Тулбар сверху, иконка текущего приложения слева | `TopAppBar` с той же иконкой, что используется для запуска каталога |
-| Акцентный цвет тулбара | Синий фон и светлый заголовок |
-| Вертикальный список | `LazyColumn` с постоянными ключами элементов |
-| Иконка, название, описание, категория | `AppListItem` для каждого приложения |
-| Вёрстка на Jetpack Compose | Весь экран в Compose, без XML-макетов |
-| Захардкоженные данные | Девять `CatalogAppDto` хранятся в `HardcodedAppCatalogDataSource`; интернет не требуется |
-| Карточка приложения | Экран подробностей оформлен по образцу практической части и использует данные каталога |
-| Витрина | `HorizontalPager`: три страницы, по три приложения на странице |
-| Навигация | Jetpack Compose Navigation связывает каталог и карточки приложений |
-| Presentation pattern | `AppCatalogViewModel` хранит состояние списка в `StateFlow` |
-| Snackbar | Кнопка в тулбаре отправляет одноразовое UI-событие через `Channel` |
-| Пересоздание Activity | `ViewModel` сохраняет состояние списка; уже обработанное событие snackbar не воспроизводится |
-| Слои приложения | `data`, `domain` и `presentation` разделены по пакетам |
-| DTO и Mapper | `CatalogAppDto` с данными источника конвертируется `CatalogAppMapper` в доменную `CatalogApp`; неизвестный ключ иконки явно отклоняется |
-| Repository | `AppRepositoryImpl` преобразует DTO и возвращает доменные модели через интерфейс `AppRepository` |
-| Use Case | `GetCatalogAppsUseCase` изолирует запрос каталога для presentation |
-| Dependency Injection | Hilt создаёт граф зависимостей; `AppModule` связывает интерфейсы с реализациями, а `AppCatalogViewModel` получает Use Case через `@Inject` |
-
-Поддержаны светлая и тёмная темы, системные отступы и увеличенный шрифт. Высота строк зависит от текста, положение списка сохраняется при пересоздании Activity. В Android Studio доступны три Preview: светлый, тёмный и с крупным шрифтом.
-
-Внизу карточки находится витрина из девяти приложений. Она разбита на три горизонтально перелистываемые страницы, по три карточки на каждой. Карточки используют тот же `AppListItem`, что и каталог. Нажатие на карточку витрины возвращает в список приложений. Иконки — учебные векторные иллюстрации.
-
-## Запуск
-
-Открыть корень репозитория в Android Studio, выполнить Gradle Sync и выбрать модуль **`homework-04`**. Общие требования к SDK и JDK — в [README курса](../../README.md#запуск-в-android-studio).
-
-Из корня репозитория в PowerShell:
-
-```powershell
-.\gradlew.bat :homework-04:assembleDebug
-& "$env:LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe" install -r assignments/04-compose-app-list/build/outputs/apk/debug/homework-04-debug.apk
-& "$env:LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe" shell am start -n com.example.vkcourse.applist/.MainActivity
-```
-
-## Где что находится
-
-```text
-src/main/java/com/example/vkcourse/applist/
-├── MainActivity.kt          # Точка входа
-├── AppCatalogApplication.kt # Application с @HiltAndroidApp
-├── di/AppModule.kt          # @Binds для интерфейсов и @Provides для Use Case
-├── data/
-│   ├── dto/                 # DTO модели каталога
-│   ├── mapper/              # DTO → domain model
-│   ├── repository/          # Реализация domain repository
-│   └── source/              # Захардкоженные DTO
-├── domain/
-│   ├── model/               # Чистые модели и типы предметной области
-│   ├── repository/          # Контракт репозитория
-│   └── usecase/             # Получение приложений каталога
-└── presentation/
-    ├── AppCatalogScreen.kt  # Каталог и переиспользуемая карточка списка
-    ├── AppCatalogViewModel.kt # Состояние каталога и одноразовые UI-события
-    ├── AppDetailsScreen.kt  # Карточка приложения и Pager-витрина
-    ├── AppNavigation.kt     # Переходы и получение ViewModel через hiltViewModel()
-    ├── AppIconResources.kt  # Привязка доменных иконок к Android-ресурсам
-    └── Theme.kt             # Цвета светлой и тёмной тем
-src/main/res/
-├── drawable/               # Локальные векторные иконки
-└── values/strings.xml      # Локализуемые подписи интерфейса
-```
-
-Hilt собирает зависимости через `AppModule`, а `MainActivity` с `@AndroidEntryPoint` запускает Compose-интерфейс. Направление зависимостей идёт внутрь: presentation зависит от domain, data реализует domain-контракт; domain не зависит от Android, Hilt и ресурсов. Захардкоженные записи лежат только в data-источнике, а интерфейс получает доменные модели после преобразования Mapper.
+Все данные и иконки хранятся в приложении, поэтому интернет для работы не нужен. Есть светлая и тёмная темы. Кнопка информации в тулбаре показывает snackbar, а положение списка сохраняется при пересоздании Activity.
 
 ## Задание 7: внедрение зависимостей
 
-- `AppCatalogApplication` помечен `@HiltAndroidApp` и зарегистрирован в манифесте.
-- `MainActivity` помечена `@AndroidEntryPoint`.
-- `AppModule` установлен в `SingletonComponent`. Два метода `@Binds` связывают `AppRepositoryImpl` с `AppRepository` и `HardcodedAppCatalogDataSource` с `AppCatalogDataSource`. Эти зависимости имеют область `@Singleton`.
-- Метод `@Provides` создаёт `GetCatalogAppsUseCase` из интерфейса `AppRepository`. Благодаря этому domain остаётся без аннотаций DI.
-- `AppCatalogViewModel` помечена `@HiltViewModel` и получает `GetCatalogAppsUseCase` в конструкторе с `@Inject`.
-- `AppNavigation` получает общую для каталога и карточки ViewModel через `hiltViewModel()` на уровне Activity. Ручная фабрика удалена.
+Раньше `MainActivity` сама создавала источник данных и репозиторий, а для ViewModel была отдельная фабрика. Теперь эти зависимости создаёт Hilt.
 
-Граф создания зависимостей:
+Основные изменения:
 
-```text
-HardcodedAppCatalogDataSource → AppCatalogDataSource
-    → AppRepositoryImpl → AppRepository
-    → GetCatalogAppsUseCase → AppCatalogViewModel
+- Добавлен `AppCatalogApplication` с `@HiltAndroidApp`, а Activity отмечена `@AndroidEntryPoint`.
+- В [AppModule.kt](src/main/java/com/example/vkcourse/applist/di/AppModule.kt) два метода `@Binds` связывают интерфейсы репозитория и источника данных с их реализациями. Метод `@Provides` создаёт `GetCatalogAppsUseCase`.
+- [AppCatalogViewModel](src/main/java/com/example/vkcourse/applist/presentation/AppCatalogViewModel.kt) получает Use Case через конструктор с `@Inject`. Для создания ViewModel используется `hiltViewModel()`.
+
+Например, связь интерфейса репозитория с реализацией описана так:
+
+```kotlin
+@Binds
+@Singleton
+abstract fun bindAppRepository(impl: AppRepositoryImpl): AppRepository
 ```
 
-Самопроверка задания 7:
+Когда Use Case запрашивает `AppRepository`, Hilt передаёт ему `AppRepositoryImpl`. Сам Use Case не содержит аннотаций Hilt: его создание описано в DI-модуле, поэтому слой domain остаётся независимым от фреймворка.
 
-- [ ] Gradle Sync и `:homework-04:assembleDebug` проходят, Hilt генерирует компоненты без ошибок отсутствующих зависимостей.
-- [ ] В `AppModule` есть `@Binds` и `@Provides`, а ViewModel использует конструктор с `@Inject`.
-- [ ] При запуске каталог загружается через внедрённый Use Case; переход в карточку и возврат работают.
-- [ ] После пересоздания Activity список остаётся доступен.
+## Как устроен код
 
-## Самопроверка
+Исходники находятся в `src/main/java/com/example/vkcourse/applist/`:
 
-- [ ] При запуске виден синий тулбар с иконкой каталога слева.
-- [ ] У каждого приложения есть иконка, название, описание и категория.
-- [ ] Список прокручивается до «VK Образование», тулбар остаётся сверху.
-- [ ] Нажатие на приложение открывает карточку с описанием.
-- [ ] Внизу карточки есть витрина из трёх страниц по три приложения.
-- [ ] Страницы витрины перелистываются горизонтально.
-- [ ] Нажатие на приложение в витрине возвращает в каталог.
-- [ ] Нажатие на кнопку информации в тулбаре показывает snackbar.
-- [ ] После пересоздания Activity список остаётся доступен, snackbar повторно не появляется.
-- [ ] В data-слое находятся DTO и захардкоженные данные; UI не читает их напрямую.
-- [ ] Репозиторий возвращает доменные модели, созданные Mapper из DTO.
-- [ ] Presentation получает каталог через ViewModel и Use Case.
-- [ ] После поворота устройства или пересоздания Activity положение списка сохраняется.
-- [ ] В тёмной теме текст и иконки читаются.
-- [ ] При увеличении системного шрифта карточки растут по высоте, текст не обрезается.
-- [ ] Без интернета отображаются все данные и иконки.
+- `data` — список приложений, DTO, преобразование данных и реализация репозитория.
+- `domain` — модели, интерфейс репозитория и Use Case для получения каталога.
+- `presentation` — Compose-экраны, навигация и ViewModel. Состояние экрана хранится в `StateFlow`, события snackbar передаются через `Channel`.
+- `di` — модуль Hilt, в котором описано создание зависимостей.
 
-## Автоматические проверки
+ViewModel обращается к Use Case, тот — к интерфейсу репозитория. Репозиторий получает данные из локального источника и преобразует DTO в модели каталога.
+
+## Как запустить
+
+1. Открыть корневую папку репозитория в Android Studio.
+2. Установить Android SDK Platform 37 и выполнить Gradle Sync. Для сборки нужен полный JDK 25 — он указан в настройках проекта.
+3. Выбрать модуль `homework-04` и запустить его на эмуляторе или устройстве с Android 7.0 и новее.
+
+Собрать APK из PowerShell можно командой из корня репозитория:
 
 ```powershell
-.\gradlew.bat :homework-04:testDebugUnitTest :homework-04:assembleDebug :homework-04:lintDebug
-# На эмуляторе или устройстве:
+.\gradlew.bat :homework-04:assembleDebug
+```
+
+Готовый файл: `assignments/04-compose-app-list/build/outputs/apk/debug/homework-04-debug.apk`.
+
+## Проверка
+
+```powershell
+# Сборка, unit-тесты и lint
+.\gradlew.bat :homework-04:assembleDebug :homework-04:testDebugUnitTest :homework-04:lintDebug
+
+# UI-тесты на запущенном эмуляторе или подключённом устройстве
 .\gradlew.bat :homework-04:connectedDebugAndroidTest
 ```
 
-Unit-тесты проверяют преобразование DTO в domain model, обработку неизвестного ключа и выдачу девяти доменных моделей репозиторием. UI-тесты проверяют поля каталога, доступность последнего приложения при прокрутке, восстановление позиции после пересоздания Activity, переходы между каталогом и карточками, перелистывание витрины, показ snackbar и отсутствие его повторного показа после пересоздания Activity.
+После добавления Hilt прошли 4 unit-теста и 7 UI-тестов на Pixel 10 (API 37). Они проверяют преобразование данных, загрузку каталога, переходы между экранами, витрину, snackbar и пересоздание Activity. APK собирается; lint завершился без ошибок, с одним предупреждением `DataExtractionRules` о настройках резервного копирования.
 
-Проверено для задания 7: сборка debug APK успешна, 4 unit-теста и 7 UI-тестов на Pixel 10 (API 37) проходят. Lint: 0 ошибок, 1 предупреждение `DataExtractionRules` о настройках резервного копирования. Если Gradle повторно использует процесс с Java из расширения VS Code без `jlink`, запускайте проверку с `--no-daemon`, используя полный JDK из настроек проекта.
+Если сборка сообщает, что не найден `jlink`, нужно проверить JDK для Gradle: среда Java из расширения VS Code может не содержать этот инструмент. После выбора полного JDK можно повторить команду с `--no-daemon`.
 
-Отчёты: `build/reports/lint-results-debug.html` и `build/reports/androidTests/connected/debug/index.html` внутри этой папки.
+Для ручной самопроверки: открыть каталог, перейти в карточку, перелистать витрину и вернуться назад. Затем прокрутить список, повернуть устройство и убедиться, что положение сохранилось.
 
-## Сдача
+## Ссылки для сдачи
 
-Пример экрана подробностей: [практический репозиторий VkEducation](https://github.com/maltsevmicyou/VkEducation). Для сдачи нужны ссылка на [репозиторий](https://github.com/tsostanov/vk-course) и Pull Request ветки решения в `main`.
+- [Репозиторий](https://github.com/tsostanov/vk-course)
+- [Решение задания 7 — Pull Request №6](https://github.com/tsostanov/vk-course/pull/6)

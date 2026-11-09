@@ -1,8 +1,10 @@
 # VK Education · Android
 
-Практические задания курса по Android-разработке. Kotlin, Jetpack Compose и работа с платформой — от Activity и Intent до интерфейсов приложений.
+Мои практические задания по Android-разработке на Kotlin. Здесь собраны приложения, которые дополняются по ходу курса: от работы с Activity и Intent до Compose, архитектуры и внедрения зависимостей.
 
-Каждое задание находится в своей папке и собирается в отдельное приложение. В корне лежат общие настройки Gradle и каталог версий библиотек.
+В репозитории два приложения: задание 3 и каталог приложений для заданий 4–7. У них общие настройки Gradle, но каждый модуль можно собрать и запустить отдельно.
+
+Решение **задания 7** находится в [Pull Request №6](https://github.com/tsostanov/vk-course/pull/6). В каталог добавлен Hilt: он создаёт репозиторий, источник данных и Use Case, который получает ViewModel.
 
 ## Задания
 
@@ -12,10 +14,10 @@
 | 4.1 | Создание UI в Android. Часть 1 | Каталог приложений на Compose: тулбар, иконки, описания и категории | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
 | 4.2 | Создание UI в Android. Часть 2 | Карточка приложения с витриной из 9 приложений, постраничным Pager и навигацией на Compose | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
 | 5 | Presentation pattern | MVVM на `ViewModel` и `StateFlow`; snackbar по нажатию на тулбар без повторного показа после пересоздания экрана | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
-| 6 | Слоистая архитектура | Data, domain и presentation: DTO → Mapper → domain model → Repository → Use Case → ViewModel | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
-| 7 | Внедрение зависимостей | Hilt, `@Binds` и `@Provides`; получение Use Case в `@HiltViewModel` через конструктор | [04-compose-app-list](assignments/04-compose-app-list/#задание-7-внедрение-зависимостей) | `homework-04` |
+| 6 | Слоистая архитектура | Разделение на data, domain и presentation; получение данных через репозиторий и Use Case | [04-compose-app-list](assignments/04-compose-app-list/) | `homework-04` |
+| 7 | Внедрение зависимостей | Hilt создаёт зависимости и передаёт Use Case в ViewModel | [04-compose-app-list](assignments/04-compose-app-list/#задание-7-внедрение-зависимостей) | `homework-04` |
 
-Задания 4.1, 4.2, 5, 6 и 7 расширяют одно приложение каталога. В каждой папке — исходники, тесты, инструкция запуска и чек-лист самопроверки.
+Подробности реализации, скриншоты и команды проверки — в README каждого приложения.
 
 ## Структура
 
@@ -39,10 +41,10 @@ settings.gradle.kts        # Подключение модулей задани�
 
 1. Клонировать репозиторий и открыть **корневую папку репозитория**, в которой находится `settings.gradle.kts`.
 2. Установить Android SDK Platform 37. Путь к SDK Android Studio сохранит в локальном `local.properties`.
-3. Выполнить Gradle Sync. JVM для Gradle задана в `gradle/gradle-daemon-jvm.properties`: **полный JDK 25**, включая `jlink`. Gradle использует свой кеш JDK или скачивает его автоматически. Автопоиск Java в сторонних редакторах отключён, чтобы не выбрать урезанную среду без инструментов сборки.
-4. Выбрать модуль `homework-03` или `homework-04` в конфигурации запуска Android App и нажать Run. Если сохранилась старая конфигурация `app`, заменить в ней модуль.
+3. Выполнить Gradle Sync. Для сборки используется **полный JDK 25**, указанный в `gradle/gradle-daemon-jvm.properties`. Gradle берёт его из кеша или скачивает автоматически.
+4. Выбрать модуль `homework-03` или `homework-04` в конфигурации запуска и нажать Run.
 
-Нужен эмулятор или устройство с **Android 7.0 (API 24)** или новее. У заданий разные `applicationId`, поэтому оба приложения можно установить одновременно.
+Для запуска подойдёт эмулятор или устройство с **Android 7.0 (API 24)** или новее. Оба приложения можно установить одновременно.
 
 ## Сборка и проверки
 
@@ -52,21 +54,14 @@ settings.gradle.kts        # Подключение модулей задани�
 # Собрать оба приложения
 .\gradlew.bat :homework-03:assembleDebug :homework-04:assembleDebug
 
-# Проверить код и unit-тесты задания 3
-.\gradlew.bat :homework-03:testDebugUnitTest :homework-03:lintDebug :homework-04:lintDebug
+# Проверить unit-тесты и lint обоих приложений
+.\gradlew.bat :homework-03:testDebugUnitTest :homework-04:testDebugUnitTest :homework-03:lintDebug :homework-04:lintDebug
 
 # UI-тесты — нужен запущенный эмулятор или подключённое устройство
 .\gradlew.bat :homework-03:connectedDebugAndroidTest :homework-04:connectedDebugAndroidTest
 ```
 
 APK и отчёты создаются в `build/` внутри папки соответствующего задания. Точные пути и отдельные команды запуска приведены в его README.
-
-## Как добавить следующее задание
-
-1. Создать папку `assignments/NN-topic` с Android-модулем и своим README.
-2. Подключить модуль в `settings.gradle.kts` по образцу существующих заданий.
-3. Указать отдельные `namespace` и `applicationId`, использовать общие версии из `gradle/libs.versions.toml`.
-4. Добавить строку в таблицу заданий. Решение вести в отдельной ветке и сдавать через Pull Request в `main`.
 
 ## Материалы
 
