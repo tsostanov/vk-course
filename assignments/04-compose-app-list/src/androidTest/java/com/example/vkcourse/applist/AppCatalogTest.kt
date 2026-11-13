@@ -2,6 +2,9 @@ package com.example.vkcourse.applist
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -10,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -48,10 +52,35 @@ class AppCatalogTest {
         waitForTag("app_list")
     }
 
-    private fun waitForTag(tag: String) {
-        compose.waitUntil(timeoutMillis = 10_000) {
+    private fun waitForTag(tag: String, timeoutMillis: Long = 10_000) {
+        compose.waitUntil(timeoutMillis = timeoutMillis) {
             compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    @Test
+    fun installationCanBeCancelledAndRestartedToCompletion() {
+        compose.onNodeWithTag("app_vk").performClick()
+        compose.onNodeWithTag("install_button").assertTextContains("Установить").performClick()
+        compose.onNodeWithTag("install_button").assertTextContains("Отменить").performClick()
+        compose.onNodeWithTag("install_button").assertTextContains("Установить").performClick()
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodesWithText("Установлено").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("install_button").assertIsNotEnabled()
+    }
+
+    @Test
+    fun sequentialAndParallelRatingsAppearOnCatalogCardsWithTimings() {
+        compose.onNodeWithTag("ratings_Sequential").performClick()
+        waitForTag("ratings_time_Sequential", timeoutMillis = 30_000)
+        compose.onNodeWithTag("ratings_Parallel").performClick()
+        waitForTag("ratings_time_Parallel")
+        compose.onNodeWithTag("app_list").performScrollToKey("vk")
+        compose.onNodeWithTag("app_rating_vk", useUnmergedTree = true)
+            .assertTextContains("★", substring = true)
+        compose.onNodeWithTag("app_rating_vk", useUnmergedTree = true)
+            .assertTextEquals(compose.activity.getString(R.string.app_rating, 4.2f))
     }
 
     @Test
@@ -94,6 +123,7 @@ class AppCatalogTest {
         compose.onNodeWithTag("app_details").assertIsDisplayed()
         compose.onNodeWithText("Карточка приложения").assertIsDisplayed()
         compose.onNodeWithText("Витрина").assertIsDisplayed()
+        compose.onNodeWithTag("showcase_page_count").performScrollTo()
         compose.onNodeWithText("1 / 3").assertIsDisplayed()
         compose.onNodeWithTag("showcase_app_music").assertIsDisplayed()
     }
@@ -101,6 +131,7 @@ class AppCatalogTest {
     @Test
     fun tappingShowcaseItemReturnsToCatalog() {
         compose.onNodeWithTag("app_vk").performClick()
+        compose.onNodeWithTag("showcase_page_count").performScrollTo()
         compose.onNodeWithTag("showcase_app_music").performClick()
 
         compose.onNodeWithTag("app_list").assertIsDisplayed()
@@ -110,6 +141,7 @@ class AppCatalogTest {
     @Test
     fun showcaseCanBeSwipedThroughAllThreePages() {
         compose.onNodeWithTag("app_vk").performClick()
+        compose.onNodeWithTag("showcase_page_count").performScrollTo()
         val pager = compose.onNodeWithTag("showcase_pager")
 
         pager.performTouchInput { swipeLeft() }

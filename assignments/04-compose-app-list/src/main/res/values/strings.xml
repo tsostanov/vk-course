@@ -14,4 +14,16 @@
     <string name="catalog_load_error">Не удалось загрузить каталог. Проверьте подключение и попробуйте ещё раз.</string>
     <string name="catalog_empty">В каталоге пока нет приложений.</string>
     <string name="catalog_retry">Повторить</string>
+    <string name="install">Установить</string>
+    <string name="cancel_install">Отменить</string>
+    <string name="installed">Установлено</string>
+    <string name="install_progress">Установка: %d%%</string>
+    <string name="ratings_title">Загрузка рейтингов</string>
+    <string name="ratings_sequential">Последовательно</string>
+    <string name="ratings_parallel">Параллельно</string>
+    <string name="ratings_loading">Загрузка: %s…</string>
+    <string name="ratings_time">%1$s: %2$d мс</string>
+    <string name="ratings_error">Не удалось загрузить рейтинги. Попробуйте ещё раз.</string>
+    <string name="app_rating">★ %1$.1f</string>
+    <string name="app_rating_pending">★ —</string>
 </resources>

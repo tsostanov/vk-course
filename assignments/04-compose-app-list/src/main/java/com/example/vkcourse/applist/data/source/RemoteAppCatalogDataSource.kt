@@ -9,6 +9,7 @@ class RemoteAppCatalogDataSource @Inject constructor(
     private val api: CatalogApi,
 ) : AppCatalogDataSource {
     override suspend fun getApps() = api.getCatalog()
+    override suspend fun getRating(id: String) = api.getRating(id)
 
     override suspend fun getAppDetails(id: String): AppDetailsDto = try {
         api.getAppDetails(id)
