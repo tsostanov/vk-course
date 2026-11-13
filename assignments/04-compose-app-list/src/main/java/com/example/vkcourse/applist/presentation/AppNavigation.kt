@@ -48,6 +48,7 @@ fun AppNavigation() {
                 )
             } else {
                 AppDetailsScreen(
+                    viewModel = hiltViewModel(entry),
                     app = app,
                     showcaseApps = catalogState.apps,
                     onBackClick = { navController.popBackStack() },

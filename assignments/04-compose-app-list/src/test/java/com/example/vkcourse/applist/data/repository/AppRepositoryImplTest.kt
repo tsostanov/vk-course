@@ -35,6 +35,14 @@ class AppRepositoryImplTest {
     }
 
     @Test
+    fun simulatedRatingRunsOnRetrofitApiWithoutHttpRequest() = runTest {
+        val ratings = repository.loadRatingsInParallel(listOf("one", "two"))
+        assertEquals(setOf("one", "two"), ratings.keys)
+        org.junit.Assert.assertTrue(ratings.values.all { it in 3f..5f })
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test
     fun loadsCatalogWithGetAndMapsServerFields() = runTest {
         server.enqueue(jsonResponse("catalog.json"))
 

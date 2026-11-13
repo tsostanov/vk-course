@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.vkcourse.applist.R
 import com.example.vkcourse.applist.domain.model.CatalogApp
+import com.example.vkcourse.applist.domain.usecase.RatingLoadMode
 
 @Composable
 fun AppCatalogScreen(
@@ -73,6 +74,11 @@ fun AppCatalogScreen(
         onAppClick = onAppClick,
         onToolbarInfoClick = viewModel::onToolbarInfoClick,
         snackbarHostState = snackbarHostState,
+        ratings = uiState.ratings,
+        ratingLoadMode = uiState.ratingLoadMode,
+        ratingTimings = uiState.ratingTimings,
+        hasRatingsError = uiState.hasRatingsError,
+        onLoadRatings = viewModel::loadRatings,
     )
 }
 
@@ -85,6 +91,11 @@ private fun AppCatalogContent(
     snackbarHostState: SnackbarHostState,
     hasError: Boolean = false,
     onRetryClick: () -> Unit = {},
+    ratings: Map<String, Float> = emptyMap(),
+    ratingLoadMode: RatingLoadMode? = null,
+    ratingTimings: Map<RatingLoadMode, Long> = emptyMap(),
+    hasRatingsError: Boolean = false,
+    onLoadRatings: (RatingLoadMode) -> Unit = {},
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -125,17 +136,52 @@ private fun AppCatalogContent(
                 ) {
                     item(key = "header", contentType = "header") {
                         CatalogHeader(apps.size)
+                        RatingControls(ratingLoadMode, ratingTimings, hasRatingsError, onLoadRatings)
                     }
                     items(apps, key = { it.id }, contentType = { "app" }) { app ->
                         AppListItem(
                             app = app,
                             onClick = { onAppClick(app) },
                             modifier = Modifier.testTag("app_${app.id}"),
+                            rating = ratings[app.id],
+                            showRating = true,
                         )
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RatingControls(
+    loadingMode: RatingLoadMode?,
+    timings: Map<RatingLoadMode, Long>,
+    hasError: Boolean,
+    onLoad: (RatingLoadMode) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.ratings_title), style = MaterialTheme.typography.titleMedium)
+        RatingLoadMode.entries.forEach { mode ->
+            val label = stringResource(when (mode) {
+                RatingLoadMode.Sequential -> R.string.ratings_sequential
+                RatingLoadMode.Parallel -> R.string.ratings_parallel
+            })
+            Button(
+                onClick = { onLoad(mode) },
+                enabled = loadingMode == null,
+                modifier = Modifier.fillMaxWidth().testTag("ratings_${mode.name}"),
+            ) {
+                Text(if (loadingMode == mode) stringResource(R.string.ratings_loading, label) else label)
+            }
+            timings[mode]?.let { elapsed ->
+                Text(
+                    stringResource(R.string.ratings_time, label, elapsed),
+                    modifier = Modifier.testTag("ratings_time_${mode.name}"),
+                )
+            }
+        }
+        if (hasError) Text(stringResource(R.string.ratings_error), color = MaterialTheme.colorScheme.error)
     }
 }
 
@@ -212,6 +258,8 @@ internal fun AppListItem(
     app: CatalogApp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    rating: Float? = null,
+    showRating: Boolean = false,
 ) {
     Surface(
         onClick = onClick,
@@ -237,6 +285,15 @@ internal fun AppListItem(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
+                if (showRating) {
+                    Text(
+                        text = rating?.let { stringResource(R.string.app_rating, it) }
+                            ?: stringResource(R.string.app_rating_pending),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.testTag("app_rating_${app.id}"),
+                    )
+                }
                 Text(
                     text = app.description,
                     style = MaterialTheme.typography.bodyMedium,

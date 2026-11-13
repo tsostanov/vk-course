@@ -22,6 +22,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,10 +54,32 @@ private const val SHOWCASE_PAGE_COUNT = 3
 
 @Composable
 fun AppDetailsScreen(
+    viewModel: AppDetailsViewModel,
     app: CatalogApp,
     onBackClick: () -> Unit,
     onShowcaseAppClick: (CatalogApp) -> Unit,
     showcaseApps: List<CatalogApp>,
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val content = state as? AppDetailsState.Content ?: return
+    AppDetailsContent(
+        app = app,
+        onBackClick = onBackClick,
+        onShowcaseAppClick = onShowcaseAppClick,
+        showcaseApps = showcaseApps,
+        installState = content.installState,
+        onInstallClick = viewModel::onInstallClick,
+    )
+}
+
+@Composable
+private fun AppDetailsContent(
+    app: CatalogApp,
+    onBackClick: () -> Unit,
+    onShowcaseAppClick: (CatalogApp) -> Unit,
+    showcaseApps: List<CatalogApp>,
+    installState: InstallState = InstallState.NotInstalled,
+    onInstallClick: () -> Unit = {},
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -69,6 +95,7 @@ fun AppDetailsScreen(
                 .testTag("app_details"),
         ) {
             AppDetailsHeader(app)
+            InstallButton(installState, onInstallClick)
             Spacer(Modifier.height(24.dp))
             Text(
                 text = stringResource(R.string.app_details_description),
@@ -95,6 +122,33 @@ fun AppDetailsScreen(
                 onAppClick = onShowcaseAppClick,
             )
             Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun InstallButton(installState: InstallState, onInstallClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Button(
+            onClick = onInstallClick,
+            enabled = installState != InstallState.Installed,
+            modifier = Modifier.fillMaxWidth().testTag("install_button"),
+        ) {
+            Text(stringResource(when (installState) {
+                InstallState.NotInstalled -> R.string.install
+                is InstallState.Installing -> R.string.cancel_install
+                InstallState.Installed -> R.string.installed
+            }))
+        }
+        if (installState is InstallState.Installing) {
+            LinearProgressIndicator(
+                progress = { installState.progress / 100f },
+                modifier = Modifier.fillMaxWidth().testTag("install_progress"),
+            )
+            Text(stringResource(R.string.install_progress, installState.progress))
         }
     }
 }
@@ -239,7 +293,7 @@ private fun DetailsToolbar(onBackClick: () -> Unit) {
 @Composable
 private fun AppDetailsPreview() {
     AppCatalogTheme {
-        AppDetailsScreen(
+        AppDetailsContent(
             app = CatalogApp(
                 id = "vk",
                 name = "ВКонтакте",
