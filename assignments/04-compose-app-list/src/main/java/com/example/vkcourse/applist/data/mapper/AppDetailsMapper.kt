@@ -4,6 +4,18 @@ import com.example.vkcourse.applist.data.dto.AppDetailsDto
 import com.example.vkcourse.applist.domain.model.AppDetails
 
 object AppDetailsMapper {
+    fun toDto(app: AppDetails) = AppDetailsDto(
+        id = app.id,
+        name = app.name,
+        developer = app.developer,
+        category = app.category,
+        ageRating = app.ageRating,
+        size = app.size,
+        iconUrl = app.iconUrl,
+        screenshotUrlList = app.screenshotUrls,
+        description = app.description,
+    )
+
     fun toDomain(dto: AppDetailsDto) = AppDetails(
         id = dto.id,
         name = dto.name,
