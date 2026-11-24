@@ -1,5 +1,6 @@
 package com.example.vkcourse.applist.data.repository
 
+import com.example.vkcourse.applist.testutil.FakeAppDetailsDao
 import com.example.vkcourse.applist.data.network.CatalogApi
 import com.example.vkcourse.applist.data.source.RemoteAppCatalogDataSource
 import kotlinx.coroutines.runBlocking
@@ -19,7 +20,7 @@ class AppRatingsBenchmarkTest {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(CatalogApi::class.java)
-        val repository = AppRepositoryImpl(RemoteAppCatalogDataSource(api))
+        val repository = AppRepositoryImpl(RemoteAppCatalogDataSource(api), FakeAppDetailsDao())
         val ids = (1..12).map { "app-$it" }
         val sequential: Map<String, Float>
         val sequentialMs = measureTimeMillis { sequential = repository.loadRatingsSequentially(ids) }

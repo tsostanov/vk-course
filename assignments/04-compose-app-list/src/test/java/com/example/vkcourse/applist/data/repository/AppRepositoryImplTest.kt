@@ -1,5 +1,6 @@
 package com.example.vkcourse.applist.data.repository
 
+import com.example.vkcourse.applist.testutil.FakeAppDetailsDao
 import com.example.vkcourse.applist.data.network.CatalogApi
 import com.example.vkcourse.applist.data.source.RemoteAppCatalogDataSource
 import kotlinx.coroutines.test.runTest
@@ -26,7 +27,7 @@ class AppRepositoryImplTest {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(CatalogApi::class.java)
-        repository = AppRepositoryImpl(RemoteAppCatalogDataSource(api))
+        repository = AppRepositoryImpl(RemoteAppCatalogDataSource(api), FakeAppDetailsDao())
     }
 
     @After

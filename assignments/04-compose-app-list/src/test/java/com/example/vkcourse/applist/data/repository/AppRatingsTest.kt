@@ -1,5 +1,6 @@
 package com.example.vkcourse.applist.data.repository
 
+import com.example.vkcourse.applist.testutil.FakeAppDetailsDao
 import com.example.vkcourse.applist.data.dto.AppDetailsDto
 import com.example.vkcourse.applist.data.dto.CatalogAppDto
 import com.example.vkcourse.applist.data.source.AppCatalogDataSource
@@ -102,5 +103,6 @@ class AppRatingsTest {
             override suspend fun getAppDetails(id: String): AppDetailsDto = error("Not needed")
             override suspend fun getRating(id: String) = rating(id)
         },
+        FakeAppDetailsDao(),
     )
 }

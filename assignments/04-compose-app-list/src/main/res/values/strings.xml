@@ -7,6 +7,13 @@
     <string name="app_count">Приложений в подборке: %d</string>
 
     <string name="app_details_title">Карточка приложения</string>
+    <string name="navigate_back">Назад</string>
+    <string name="app_details_load_error">Не удалось загрузить карточку приложения. Попробуйте ещё раз.</string>
+    <string name="wishlist_add">Добавить в Wishlist</string>
+    <string name="wishlist_remove">Удалить из Wishlist</string>
+    <string name="wishlist_added">В Wishlist</string>
+    <string name="wishlist_not_added">Не в Wishlist</string>
+    <string name="wishlist_update_error">Не удалось изменить Wishlist. Нажмите на сердечко ещё раз.</string>
     <string name="app_details_description">Описание</string>
     <string name="showcase_title">Витрина</string>
     <string name="catalog_info_description">Информация о каталоге</string>

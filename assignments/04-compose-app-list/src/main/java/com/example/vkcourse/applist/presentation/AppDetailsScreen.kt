@@ -26,6 +26,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,9 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,20 +60,44 @@ private const val SHOWCASE_PAGE_COUNT = 3
 @Composable
 fun AppDetailsScreen(
     viewModel: AppDetailsViewModel,
-    app: CatalogApp,
     onBackClick: () -> Unit,
     onShowcaseAppClick: (CatalogApp) -> Unit,
     showcaseApps: List<CatalogApp>,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val content = state as? AppDetailsState.Content ?: return
+    val content = state as? AppDetailsState.Content
+    if (content == null) {
+        Scaffold(
+            topBar = { DetailsToolbar(onBackClick) },
+        ) { padding ->
+            Column(
+                modifier = Modifier.fillMaxSize().padding(padding).padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                if (state == AppDetailsState.Error) {
+                    Text(stringResource(R.string.app_details_load_error))
+                    Button(onClick = viewModel::loadAppDetails, modifier = Modifier.testTag("details_retry")) {
+                        Text(stringResource(R.string.catalog_retry))
+                    }
+                } else {
+                    CircularProgressIndicator(modifier = Modifier.testTag("details_loading"))
+                }
+            }
+        }
+        return
+    }
+    val details = content.appDetails
     AppDetailsContent(
-        app = app,
+        app = CatalogApp(details.id, details.name, details.description, details.category, details.iconUrl),
         onBackClick = onBackClick,
         onShowcaseAppClick = onShowcaseAppClick,
         showcaseApps = showcaseApps,
         installState = content.installState,
         onInstallClick = viewModel::onInstallClick,
+        isInWishlist = content.isInWishlist,
+        onWishlistClick = viewModel::toggleWishlist,
+        wishlistError = content.wishlistError,
     )
 }
 
@@ -80,11 +109,14 @@ private fun AppDetailsContent(
     showcaseApps: List<CatalogApp>,
     installState: InstallState = InstallState.NotInstalled,
     onInstallClick: () -> Unit = {},
+    isInWishlist: Boolean = false,
+    onWishlistClick: () -> Unit = {},
+    wishlistError: Boolean = false,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = { DetailsToolbar(onBackClick) },
+        topBar = { DetailsToolbar(onBackClick, isInWishlist, onWishlistClick) },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -95,6 +127,13 @@ private fun AppDetailsContent(
                 .testTag("app_details"),
         ) {
             AppDetailsHeader(app)
+            if (wishlistError) {
+                Text(
+                    text = stringResource(R.string.wishlist_update_error),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 20.dp).testTag("wishlist_error"),
+                )
+            }
             InstallButton(installState, onInstallClick)
             Spacer(Modifier.height(24.dp))
             Text(
@@ -256,7 +295,18 @@ private fun Showcase(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DetailsToolbar(onBackClick: () -> Unit) {
+private fun DetailsToolbar(
+    onBackClick: () -> Unit,
+    isInWishlist: Boolean = false,
+    onWishlistClick: (() -> Unit)? = null,
+) {
+    val wishlistDescription = stringResource(
+        if (isInWishlist) R.string.wishlist_remove else R.string.wishlist_add,
+    )
+    val wishlistState = stringResource(
+        if (isInWishlist) R.string.wishlist_added else R.string.wishlist_not_added,
+    )
+    val backDescription = stringResource(R.string.navigate_back)
     TopAppBar(
         title = {
             Text(
@@ -272,8 +322,26 @@ private fun DetailsToolbar(onBackClick: () -> Unit) {
                     fontSize = 32.sp,
                     color = Color.White,
                     modifier = Modifier.semantics {
-                        this.contentDescription = "Назад"
+                        this.contentDescription = backDescription
                     },
+                )
+            }
+        },
+        actions = {
+            IconToggleButton(
+                checked = isInWishlist,
+                onCheckedChange = { onWishlistClick?.invoke() },
+                enabled = onWishlistClick != null,
+                modifier = Modifier.testTag("wishlist_button").semantics {
+                    stateDescription = wishlistState
+                },
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (isInWishlist) R.drawable.ic_favorite else R.drawable.ic_favorite_border,
+                    ),
+                    contentDescription = wishlistDescription,
+                    tint = Color.White,
                 )
             }
         },

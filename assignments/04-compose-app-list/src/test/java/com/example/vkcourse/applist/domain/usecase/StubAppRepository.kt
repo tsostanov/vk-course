@@ -3,9 +3,13 @@ package com.example.vkcourse.applist.domain.usecase
 import com.example.vkcourse.applist.domain.model.AppDetails
 import com.example.vkcourse.applist.domain.model.CatalogApp
 import com.example.vkcourse.applist.domain.repository.AppRepository
+import kotlinx.coroutines.flow.Flow
 
 internal class StubAppRepository : AppRepository {
     var catalog: suspend () -> List<CatalogApp> = { error("Unexpected catalog request") }
+    var details: suspend (String) -> AppDetails = { error("Unexpected details request") }
+    var observeDetails: (String) -> Flow<AppDetails> = { error("Unexpected observation") }
+    var toggle: suspend (String) -> Unit = { error("Unexpected toggle") }
     var sequential: suspend (List<String>) -> Map<String, Float> = { error("Unexpected sequential request") }
     var parallel: suspend (List<String>) -> Map<String, Float> = { error("Unexpected parallel request") }
     var catalogCalls = 0
@@ -28,5 +32,7 @@ internal class StubAppRepository : AppRepository {
         return parallel(ids)
     }
 
-    override suspend fun getAppDetails(id: String): AppDetails = error("Unexpected details request: $id")
+    override suspend fun getAppDetails(id: String): AppDetails = details(id)
+    override fun observeAppDetails(id: String): Flow<AppDetails> = observeDetails(id)
+    override suspend fun toggleWishlist(id: String) = toggle(id)
 }
