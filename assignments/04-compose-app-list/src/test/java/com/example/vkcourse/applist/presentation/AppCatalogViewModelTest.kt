@@ -118,6 +118,8 @@ class AppCatalogViewModelTest {
         val repository = object : AppRepository {
             override suspend fun getApps() = load()
             override suspend fun getAppDetails(id: String): AppDetails = error("Not used by catalog UI")
+            override fun observeAppDetails(id: String): kotlinx.coroutines.flow.Flow<AppDetails> = error("Not used")
+            override suspend fun toggleWishlist(id: String) = error("Not used")
             override suspend fun loadRatingsSequentially(ids: List<String>) = ids.associateWith { 4f }
             override suspend fun loadRatingsInParallel(ids: List<String>) = ids.associateWith { 4.5f }
         }

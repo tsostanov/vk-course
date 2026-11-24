@@ -2,8 +2,9 @@ package com.example.vkcourse.applist
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.example.vkcourse.applist.data.repository.AppRepositoryImpl
 import com.example.vkcourse.applist.data.source.RemoteAppCatalogDataSource
+import com.example.vkcourse.applist.data.mapper.AppDetailsMapper
+import com.example.vkcourse.applist.data.mapper.CatalogAppMapper
 import com.example.vkcourse.applist.di.NetworkModule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -20,15 +21,15 @@ class LiveCatalogApiTest {
         assumeTrue(InstrumentationRegistry.getArguments().getString("liveApi") == "true")
         val retrofit = NetworkModule.provideRetrofit(NetworkModule.provideOkHttpClient())
         val api = NetworkModule.provideCatalogApi(retrofit)
-        val repository = AppRepositoryImpl(RemoteAppCatalogDataSource(api))
+        val source = RemoteAppCatalogDataSource(api)
 
-        val catalog = repository.getApps()
+        val catalog = source.getApps().map(CatalogAppMapper::toDomain)
         assertTrue(catalog.isNotEmpty())
         val first = catalog.first()
         assertTrue(first.name.isNotBlank())
         assertTrue(first.iconUrl.startsWith("https://"))
 
-        val details = repository.getAppDetails(first.id)
+        val details = AppDetailsMapper.toDomain(source.getAppDetails(first.id))
         assertEquals(first.id, details.id)
         assertEquals(first.name, details.name)
         assertTrue(details.developer.isNotBlank())

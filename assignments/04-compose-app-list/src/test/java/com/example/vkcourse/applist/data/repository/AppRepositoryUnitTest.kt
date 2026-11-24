@@ -1,5 +1,6 @@
 package com.example.vkcourse.applist.data.repository
 
+import com.example.vkcourse.applist.testutil.FakeAppDetailsDao
 import com.example.vkcourse.applist.data.dto.AppDetailsDto
 import com.example.vkcourse.applist.data.dto.CatalogAppDto
 import com.example.vkcourse.applist.data.source.AppCatalogDataSource
@@ -105,5 +106,5 @@ class AppRepositoryUnitTest {
         override suspend fun getApps() = catalog()
         override suspend fun getAppDetails(id: String) = details(id)
         override suspend fun getRating(id: String): Float = error("Unexpected rating request: $id")
-    })
+    }, FakeAppDetailsDao())
 }

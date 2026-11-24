@@ -3,9 +3,12 @@ package com.example.vkcourse.applist
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,6 +22,10 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.lifecycle.ViewModelProvider
 import com.example.vkcourse.applist.data.network.CatalogApi
+import com.example.vkcourse.applist.data.local.AppDatabase
+import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import com.example.vkcourse.applist.di.NetworkModule
 import com.example.vkcourse.applist.presentation.AppCatalogViewModel
 import dagger.hilt.android.testing.BindValue
@@ -34,6 +41,7 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 @UninstallModules(NetworkModule::class)
 class AppCatalogTest {
+    @Inject lateinit var database: AppDatabase
     private val fakeApi = FakeCatalogApi()
 
     @BindValue
@@ -49,7 +57,52 @@ class AppCatalogTest {
     @Before
     fun waitForCatalog() {
         hilt.inject()
+        runBlocking(Dispatchers.IO) { database.clearAllTables() }
         waitForTag("app_list")
+    }
+
+    @Test
+    fun wishlistSurvivesRecreationAndReopeningAndIsSeparateForEachApp() {
+        compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("app_details")
+        compose.onNodeWithTag("wishlist_button").assertIsOff().performClick()
+        waitForWishlist(added = true)
+        compose.activityRule.scenario.recreate()
+        waitForTag("app_details")
+        compose.onNodeWithTag("wishlist_button").assertIsOn()
+        compose.onNodeWithContentDescription("Назад").performClick()
+        compose.onNodeWithTag("app_music").performClick()
+        waitForTag("app_details")
+        compose.onNodeWithTag("wishlist_button").assertIsOff()
+        compose.onNodeWithContentDescription("Назад").performClick()
+        compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("app_details")
+        waitForWishlist(added = true)
+        compose.onNodeWithTag("wishlist_button").assertIsOn().performClick()
+        waitForWishlist(added = false)
+        compose.onNodeWithContentDescription("Назад").performClick()
+        compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("app_details")
+        compose.onNodeWithTag("wishlist_button").assertIsOff()
+    }
+
+    @Test
+    fun detailsFailureCanBeRetried() {
+        fakeApi.failNextDetailsRequest = true
+        compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("details_retry")
+        compose.onNodeWithTag("wishlist_button").assertIsNotEnabled()
+        compose.onNodeWithTag("details_retry").performClick()
+        waitForTag("app_details")
+        compose.onNodeWithTag("wishlist_button").assertIsOff()
+    }
+
+    private fun waitForWishlist(added: Boolean) {
+        val description = if (added) "Удалить из Wishlist" else "Добавить в Wishlist"
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodesWithTag("app_details").fetchSemanticsNodes().isNotEmpty() &&
+                compose.onAllNodesWithContentDescription(description).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     private fun waitForTag(tag: String, timeoutMillis: Long = 10_000) {
@@ -61,6 +114,7 @@ class AppCatalogTest {
     @Test
     fun installationCanBeCancelledAndRestartedToCompletion() {
         compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("app_details")
         compose.onNodeWithTag("install_button").assertTextContains("Установить").performClick()
         compose.onNodeWithTag("install_button").assertTextContains("Отменить").performClick()
         compose.onNodeWithTag("install_button").assertTextContains("Установить").performClick()
@@ -119,6 +173,7 @@ class AppCatalogTest {
     @Test
     fun tappingCatalogItemOpensDetailsWithThreePageShowcase() {
         compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("app_details")
 
         compose.onNodeWithTag("app_details").assertIsDisplayed()
         compose.onNodeWithText("Карточка приложения").assertIsDisplayed()
@@ -131,6 +186,7 @@ class AppCatalogTest {
     @Test
     fun tappingShowcaseItemReturnsToCatalog() {
         compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("app_details")
         compose.onNodeWithTag("showcase_page_count").performScrollTo()
         compose.onNodeWithTag("showcase_app_music").performClick()
 
@@ -141,6 +197,7 @@ class AppCatalogTest {
     @Test
     fun showcaseCanBeSwipedThroughAllThreePages() {
         compose.onNodeWithTag("app_vk").performClick()
+        waitForTag("app_details")
         compose.onNodeWithTag("showcase_page_count").performScrollTo()
         val pager = compose.onNodeWithTag("showcase_pager")
 

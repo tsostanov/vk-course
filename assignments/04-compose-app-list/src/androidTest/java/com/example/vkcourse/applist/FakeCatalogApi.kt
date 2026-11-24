@@ -1,6 +1,7 @@
 package com.example.vkcourse.applist
 
 import com.example.vkcourse.applist.data.dto.CatalogAppDto
+import com.example.vkcourse.applist.data.dto.AppDetailsDto
 import com.example.vkcourse.applist.data.network.CatalogApi
 import java.io.IOException
 import kotlinx.coroutines.delay
@@ -9,6 +10,7 @@ import kotlinx.coroutines.delay
 class FakeCatalogApi : CatalogApi {
     var failNextRequest = false
     var returnEmptyCatalog = false
+    var failNextDetailsRequest = false
 
     override suspend fun getRating(id: String): Float {
         delay(1_500)
@@ -37,6 +39,16 @@ class FakeCatalogApi : CatalogApi {
         )
     }
 
-    override suspend fun getAppDetails(id: String) = error("Details endpoint must not be used by catalog UI")
-    override suspend fun getCatalogAppDetails(id: String) = error("Details endpoint must not be used by catalog UI")
+    override suspend fun getAppDetails(id: String): AppDetailsDto {
+        if (failNextDetailsRequest) {
+            failNextDetailsRequest = false
+            throw IOException("Test details error")
+        }
+        val app = getCatalog().first { it.id == id }
+        return AppDetailsDto(
+            app.id, app.name, "VK", app.category, 12, 10.0, app.iconUrl,
+            emptyList(), app.description,
+        )
+    }
+    override suspend fun getCatalogAppDetails(id: String) = getAppDetails(id)
 }
